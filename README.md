@@ -10,13 +10,13 @@ Only the following files need to be executed to train and predict, given that yo
 3. Run "predict.R" to use the model
 
 ![Training accuracy over epochs](example_figures/training_example.png)
-*Figure 1: Training and validation accuracy over 10 epochs for an example with 9 to 21 streams per streamer.*
+*Figure 1: Training and validation accuracy over 10 epochs for an example with 9 streamers and 9 to 21 VODs (video-on-demand) per streamer.*
 
 
 
 ![Example of prediction](example_figures/example_prediction.png)
 *Figure 2:  
-The example's prediction of the following messages:  
+The example in Figure 1 prediction of the following messages, plotted with plot_probability.R:  
 Do you like machine learning?,  
 Is coffee or tea better?,   
 qjocqcfjjfjccfydfg,  
@@ -33,7 +33,7 @@ no*
 
 
 ![Exanoke of tokenized message](example_figures/tokenized_messages_from_stream.png)
-*Figure 3: Tokenization ID rules for this example is in "lookup.csv" not including 0, where 0 is saved for unk (unknown words).*
+*Figure 3: List of messages of one VOD before it is made into chunks, for the example in Figure 1 and 2. The order of the messages as they were written in the chat is preserved. Only the whole chunks within one VOD are randomized, and validation gets at most 20% of the chunks within one VOD. Tokenization ID rules is from "lookup.csv", not including 0, where 0 is saved for unk (unknown words). Note that lookup.csv is generated upon running "vocabulary.R"*
 
 
 
