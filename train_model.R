@@ -2,12 +2,15 @@ library(keras3)
 library(reticulate)
 library(jsonlite)
 
-# First set your working director correctly to where your files are
-getwd()
-# setwd("")
+# First set your working directory to where your .R files are: setwd("")
+# Check your current working directory with: getwd()
 
-source("helper.R")
+source("settings.R")
+source("prepare_training_data.R")
 
+
+
+# Install keras if you have not already (once)
 "
 install_keras(
   backend = 'tensorflow',
@@ -20,52 +23,40 @@ install_keras(
 # Prepare data to session (~6 GB)
 # ============================================================
 
-streamers <- c(
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8"
-)
-
-
+# Prepare training and validation data.
 # save files to to R session
-training_data <- prepare_training_data(paste0(getwd(), "/messages"),
-                      streamers,
-                      messages_per_chunk = 100
-                      )
-for (i in seq_along(training_data$x)) {
-  names(training_data$x[[i]]) <- NULL
-  
-  for (j in seq_along(training_data$x[[i]])) {
-    names(training_data$x[[i]][[j]]) <- NULL
-  }
-}
+
+training_data <- prepare_training_data(
+  file.path(getwd(), "vectors"),
+  streamers,
+  messages_per_chunk = messages_per_chunk,
+  validation_fraction = validation_split
+)
 
 tf <- import("tensorflow")
 
-# Convert to tensorflow object
-for (i in seq_along(training_data$x)) {
-  training_data$x[[i]] <- tf$ragged$constant(
-    training_data$x[[i]],
-    dtype = tf$int32
-  )
+# Convert both datasets to TensorFlow ragged tensors.
+for (dataset_name in c("x", "x_val")) {
+
+  inputs <- training_data[[dataset_name]]
+
+  for (i in seq_along(inputs)) {
+
+    names(inputs[[i]]) <- NULL
+
+    for (j in seq_along(inputs[[i]])) {
+      names(inputs[[i]][[j]]) <- NULL
+    }
+
+    inputs[[i]] <- tf$ragged$constant(
+      inputs[[i]],
+      dtype = tf$int32
+    )
+  }
+
+  training_data[[dataset_name]] <- inputs
 }
 
-
-# ============================================================
-# SETTINGS
-# ============================================================
-
-vocab_size <- 203535 + 1 # (+1 for the 0 for unidentified words)
-embedding_dim <- 64
-messages_per_chunk <- 100 # for the training data, the input in implementation can be any size
-num_streamers <- 9
-validation_split = 0.2
 
 
 # ============================================================
@@ -74,7 +65,10 @@ validation_split = 0.2
 #
 # This is ONE matrix:
 #
-# vocab_size × embedding_dim
+# vocab_size × embedding_dim    
+#
+# (+1 for the "0" for unidentified words)
+vocab_size <- nrow(read.csv("lookup.csv")) + 1 
 #
 # Every one of the 100 messages uses this SAME matrix.
 #
@@ -97,7 +91,7 @@ embedding <- layer_embedding(
 #
 # Each integer is then turned into a 64 dimensional vector.
 #
-# The message can contain any number of tokens (any length of words)
+# The message can contain any number of tokens (any Fvoca of words)
 #
 # Example:
 #
@@ -183,14 +177,14 @@ x <- layer_concatenate(
 
 outputs <- x |>
   layer_dense(
-    units = 256,
+    units = dense_units_1,
     activation = "relu",
-    name = "dense_256"
+    name = "hidden_layer_1"
   ) |>
   layer_dense(
-    units = 128,
+    units = dense_units_2,
     activation = "relu",
-    name = "dense_128"
+    name = "hidden_layer_2"
   ) |>
   layer_dense(
     units = num_streamers,
@@ -215,9 +209,10 @@ model <- keras_model(
 # ============================================================
 
 model |> compile(
-  optimizer = optimizer_adam(learning_rate = 0.001),
+  optimizer = optimizer_adam(learning_rate = learning_rate),
   loss = "sparse_categorical_crossentropy",
-  metrics = "accuracy"
+  metrics = "accuracy",
+  jit_compile = FALSE
 )
 
 
@@ -231,13 +226,15 @@ model |> summary()
 history <- model |> fit(
   x = training_data$x,
   y = training_data$y,
-  epochs = 10,
-  batch_size = 32,
-  #batch_size = 64,
-  #batch_size = 128,
-  validation_split = 0.2,
+  epochs = epochs,
+  batch_size = batch_size,
+  validation_data = list(
+    training_data$x_val,
+    training_data$y_val
+  ),
   verbose = 2
 )
+
 
 #get_weights(model)
 

@@ -3,6 +3,7 @@ import csv
 import re
 import os
 
+# This script has only function definitions (python)
 
 def extract_messages_from_json(input_file, output_txt_file):
     """
@@ -37,8 +38,10 @@ def extract_messages_from_json(input_file, output_txt_file):
 def transform_messages_to_vectors(
     input_txt_file,
     lookup_csv_file,
-    output_json_file = "default.json",
-    return_dataset="false"):
+    output_json_file="default.json",
+    return_dataset="false",
+    print_unknown_words=False,
+    valid_messages_file=None):
     """
     Takes a text file of messages and a CSV lookup table.
 
@@ -54,9 +57,11 @@ def transform_messages_to_vectors(
 
     The final JSON contains one vector per message.
     """
-
-    lookup_table = {}
     
+    lookup_table = {}
+    dataset = []
+    valid_messages = []
+
     # ------------------------------------------
     # 1. Load the lookup table
     # ------------------------------------------
@@ -84,7 +89,7 @@ def transform_messages_to_vectors(
     try:
         with open(input_txt_file, 'r', encoding='utf-8') as f:
         
-            for line in f:
+            for line_number, line in enumerate(f, start=1):
                 line = line.strip()
 
                 if not line:
@@ -97,23 +102,37 @@ def transform_messages_to_vectors(
                 # -> ["this", "is", "great"]
                 words = re.findall(r'\w+', line.lower())
 
+               # Identify every unrecognized word
+                unknown_words = [word for word in words
+                                 if word not in lookup_table]
+
+                if print_unknown_words and unknown_words:
+                    print(f"Message {line_number}: " 
+                          + ", ".join(unknown_words))
+
+
                 # Convert each word to its integer ID.
                 # Words not found in the lookup table are turned to 0.
-                vector = [
-                    lookup_table.get(word, 0)
-                    for word in words
-                ]
+                vector = [lookup_table.get(word, 0)
+                          for word in words]
 
 
-                # Only keep messages where at least one word
+                # Only keep messages where at least one recognized word
                 # was found in the lookup table.
-                if vector:
+                if any(vector):
                     dataset.append(vector)
+                    valid_messages.append(line)
+
+
+
 
         # ------------------------------------------
         # 3. Save dataset
         # ------------------------------------------
-        
+        if valid_messages_file is not None:
+            with open(valid_messages_file, 'w', encoding='utf-8') as f:
+                json.dump(valid_messages, f, ensure_ascii=False)
+
         if return_dataset == "true":
             return dataset
         
@@ -133,30 +152,12 @@ def transform_messages_to_vectors(
 
 
 
-
-
-
-
-
 def create_streamer_vectors(
     streamer_name,
     input_directory,
     lookup_csv_file,
     output_directory
 ):
-    """
-    Processes all JSON chat files belonging to one streamer.
-
-    Each JSON file is:
-        JSON chat
-        -> extracted messages
-        -> integer vectors
-
-    All vectors from all chat files are combined into one JSON file:
-
-        output_directory/streamer_name.json
-    """
-
     os.makedirs(output_directory, exist_ok=True)
 
     streamer_directory = os.path.join(
@@ -164,33 +165,26 @@ def create_streamer_vectors(
         streamer_name
     )
 
-    output_file = os.path.join(
+    # Each original recording gets its own output folder.
+    streamer_output_directory = os.path.join(
         output_directory,
-        f"{streamer_name}.json"
+        streamer_name
     )
+    os.makedirs(streamer_output_directory, exist_ok=True)
 
-    all_vectors = []
-
-    # ------------------------------------------
-    # Find all JSON files for this streamer
-    # ------------------------------------------
-
-    json_files = [
-        file
-        for file in os.listdir(streamer_directory)
+    json_files = sorted([
+        file for file in os.listdir(streamer_directory)
         if file.lower().endswith(".json")
-    ]
-
-    json_files.sort()
+    ])
 
     print(
-        f"Found {len(json_files)} JSON files for "
-        f"{streamer_name}"
+        f"Found {len(json_files)} recordings for {streamer_name}"
     )
 
-    # ------------------------------------------
-    # Process every JSON file
-    # ------------------------------------------
+    extracted_file = os.path.join(
+        output_directory,
+        f"_temp_{streamer_name}.txt"
+    )
 
     for i, json_file in enumerate(json_files, start=1):
 
@@ -199,87 +193,34 @@ def create_streamer_vectors(
             json_file
         )
 
-        # Temporary files
-        extracted_file = os.path.join(
-            output_directory,
-            "_temp_messages.txt"
-        )
+        # Preserve the original recording's filename.
+        session_name = os.path.splitext(json_file)[0]
 
-        temp_vectors_file = os.path.join(
-            output_directory,
-            "_temp_vectors.json"
+        output_file = os.path.join(
+            streamer_output_directory,
+            f"{session_name}.json"
         )
 
         print(
-            f"[{i}/{len(json_files)}] "
-            f"Processing {json_file}"
+            f"[{i}/{len(json_files)}] Processing {json_file}"
         )
 
-        # Step 1:
         # JSON -> messages
         extract_messages_from_json(
             input_json,
             extracted_file
         )
 
-        # Step 2:
-        # messages -> vectors
+        # Messages -> vectors
         transform_messages_to_vectors(
             extracted_file,
             lookup_csv_file,
-            temp_vectors_file
+            output_file
         )
-
-        # --------------------------------------
-        # Load the vectors
-        # --------------------------------------
-
-        try:
-            with open(
-                temp_vectors_file,
-                "r",
-                encoding="utf-8"
-            ) as f:
-                vectors = json.load(f)
-
-            all_vectors.extend(vectors)
-
-        except Exception as e:
-            print(
-                f"Error reading vectors from "
-                f"{json_file}: {e}"
-            )
-
-    # ------------------------------------------
-    # Save combined vectors
-    # ------------------------------------------
-
-    with open(
-        output_file,
-        "w",
-        encoding="utf-8"
-    ) as f:
-        json.dump(
-            all_vectors,
-            f
-        )
-
-    print()
-    print(
-        f"Finished {streamer_name}: "
-        f"{len(all_vectors)} messages"
-    )
-
-    print(
-        f"Saved to {output_file}"
-    )
-
-    # ------------------------------------------
-    # Clean temporary files
-    # ------------------------------------------
 
     if os.path.exists(extracted_file):
         os.remove(extracted_file)
 
-    if os.path.exists(temp_vectors_file):
-        os.remove(temp_vectors_file)
+    print(f"Finished {streamer_name}")
+    print(f"Saved recordings to {streamer_output_directory}")
+
