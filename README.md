@@ -50,7 +50,23 @@ Recommended Twitch-chat downloader:
 * Consider [Twitch TOS](https://legal.twitch.com/en/legal/terms-of-service/) 
 	* Section 7: "(d) use of any data mining, robots, or similar data gathering or extraction methods; (e) downloading (except page caching) of any portion of the Twitch Services, the Materials, or any information contained in them, except as expressly permitted on the Twitch Services"
 	* Section 10: access any website, server, ... by Twitch, ..., by means of any robot, spider, scraper, crawler, or other automated means for any purpose
-	* Section 18: Twitch reserves the right ...  to block or prevent your future access to and use of the Twitch Services for any reason, including without limitation if: (a) your use of the Twitch Services violates these Terms of Service ...
+	* Section 18: Twitch reserves the right ...  to block or prevent your future access to and use of the Twitch Services for any reason, including without limitation if: (a) your use of the Twitch Services violates these Terms of Service ...  
+
+#### My advice is:
+Automate with the help of an AI tool.  
+Use [TwitchDownloaderCLI by lay295](https://github.com/lay295/TwitchDownloader) which requires a lot of setup but you can do syncing of VOD (video-on-demand) links with something similar to this excerpt from my automation, using [yt-dlp](https://github.com/yt-dlp/yt-dlp) for extracting the link with:  
+```bash
+...
+yt-dlp --flat-playlist --print "%(url)s" "https://www.twitch.tv/$streamer/videos" > "$temp_file" 2>/dev/null
+...
+```
+and downloading the messages like this excerpt:  
+```bash
+...
+./TwitchDownloaderCLI chatdownload --id 123456789 -o 612942303_chat.json
+...
+```
+* Do not save usernames or permanently store chat messages after training. 
 
 ##### Needed:
 
@@ -75,23 +91,23 @@ install.packages(c(
 ##### Construct the following folder structure:
 * <streamer_name> folders must match the exact streamer names in settings.
 
-./ 
-└──  Files in this repo.
+./  
+└──  Files in this repo.  
 
-./
-└── <streamer_name>/
-    ├── <vod_1>.json
-    └── <vod_2>.json
+./  
+└── <streamer_name>/  
+    ├── <vod_1>.json  
+    └── <vod_2>.json  
 
 
-Each JSON must contain (where additional keys are allowed in both depths and are ignored):
-{
-  "messages": [
-    {"message": "nerd?"},
-    {"message": "lmfao"}
-    ...
-  ]
-}
+Each JSON must contain (where additional keys are allowed in both depths and are ignored):  
+{  
+  "messages": [  
+    {"message": "nerd?"},  
+    {"message": "lmfao"}  
+    ...  
+  ]  
+}  
 
 ##### Then do as follows:
 0. Set "settings.R" as you wish
