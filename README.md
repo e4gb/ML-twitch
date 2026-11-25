@@ -33,7 +33,7 @@ no*
 
 
 ![Exanoke of tokenized message](example_figures/tokenized_messages_from_stream.png)
-*Figure 3: List of messages of one VOD before it is made into chunks, for the example in Figure 1 and 2. The order of the messages as they were written in the chat is preserved. Only the whole chunks within one VOD are randomized, and validation gets at most 20% of the chunks within one VOD. Tokenization ID rules is from "lookup.csv", not including 0, where 0 is saved for unk (unknown words). Note that lookup.csv is generated upon running "vocabulary.R"*
+*Figure 3: List of messages of one VOD before it is made into chunks, for the example in Figure 1 and 2. The order of the messages as they were written in the chat is preserved. Entire VODs are assigned to either training or validation. At most 20% of VODs belonging to a streamer will be part of validation, while the other 80% (or more if not divisible perfectly) will be training. For the special case of 4 or less VODs for one streamer, one validation VOD will be forced and therefore have more than 20% for validation (since 1/4=0.25, 1/3=0,333, 1/2=0,5). This procedure is repeated for every streamer. The tokenization ID rules in Figure 3 is from "lookup.csv", not including 0, where 0 is saved for unk (unknown words). Note that lookup.csv is generated upon running "vocabulary.R" from all the chat messages.*
 
 
 
