@@ -33,7 +33,7 @@ no*
 
 
 ![Exanoke of tokenized message](example_figures/tokenized_messages_from_stream.png)
-*Figure 3: Tokenization ID rules for this example is in "lookup.csv" not including 0, where 0 is saved for <unk> (unknown words).*
+*Figure 3: Tokenization ID rules for this example is in "lookup.csv" not including 0, where 0 is saved for unk (unknown words).*
 
 
 
