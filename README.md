@@ -1,14 +1,17 @@
 # ML-twitch
 
-A machine learning project for classification for twitch streamers based on the chatters (Neural Network) using the package keras in R.
+A machine learning project for classification for twitch streamers based on the chatters (Neural Network) using the package keras3 in R.
 
-* Figure 1: Training and validation accuracy over 10 epochs for an example with 9 to 21 streams per streamer.*
+
 
 ![Training accuracy over epochs](example_figures/training_example.png)
+*Figure 1: Training and validation accuracy over 10 epochs for an example with 9 to 21 streams per streamer.*
 
 
 
-*Figure 2: The example's prediction of the following messages:  
+![Example of prediction](example_figures/example_prediction.png)
+*Figure 2:  
+The example's prediction of the following messages:  
 Do you like machine learning?,  
 Is coffee or tea better?,   
 qjocqcfjjfjccfydfg,  
@@ -22,13 +25,10 @@ what is this?,
 cinema,  
 no*
 
-![Example of prediction](example_figures/example_prediction.png)
 
-
-*Figure 3: Tokenization ID rules for this example is in "lookup.csv" not including 0, where 0 is saved for <unk> (unknown words).*
 
 ![Exanoke of tokenized message](example_figures/tokenized_messages_from_stream.png)
-
+*Figure 3: Tokenization ID rules for this example is in "lookup.csv" not including 0, where 0 is saved for <unk> (unknown words).*
 
 
 
