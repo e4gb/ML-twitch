@@ -2,44 +2,46 @@
 
 A machine learning project for classification for twitch streamers based on the chatters (Neural Network) using the package keras in R.
 
+* Figure 1: Training and validation accuracy over 10 epochs for an example with 9 to 21 streams per streamer.*
 
 ![Training accuracy over epochs](example_figures/training_example.png)
 
-*Training and validation accuracy over 10 epochs for an example with 9 to 21 streams per streamer.*
 
+
+*Figure 2: The example's prediction of the following messages:  
+Do you like machine learning?,  
+Is coffee or tea better?,   
+qjocqcfjjfjccfydfg,  
+Good stream,  
+Love the content!,  
+What is 1 + 2 - ahhhhh asdfasdfasdfasdfasdf,  
+YES!,  
+Lol,  
+hahahahahha,  
+what is this?,  
+cinema,  
+no*
 
 ![Example of prediction](example_figures/example_prediction.png)
 
-*The example's prediction of the following messages: 
-Do you like machine learning?,
-Is coffee or tea better?, 
-qjocqcfjjfjccfydfg,
-Good stream,
-Love the content!,
-What is 1 + 2 - ahhhhh asdfasdfasdfasdfasdf,
-YES!,
-Lol,
-hahahahahha,
-what is this?,
-cinema,
-no*
 
+*Figure 3: Tokenization ID rules for this example is in "lookup.csv" not including 0, where 0 is saved for <unk> (unknown words).*
 
 ![Exanoke of tokenized message](example_figures/tokenized_messages_from_stream.png)
 
-*Tokenization ID rules for this example is in "lookup.csv" not including 0, where 0 is saved for <unk> (unknown words).*
+
 
 
 #### Streamers:
-  cinna 0,
-  dantes 1,
-  extraemily 2,
-  ishowspeed 3,
-  jasontheween 4,
-  ludwig 5,
-  marlon 6,
-  moistcr1tikal 7,
-  xqc 8
+  cinna 0,  
+  dantes 1,  
+  extraemily 2,  
+  ishowspeed 3,  
+  jasontheween 4,  
+  ludwig 5,  
+  marlon 6,  
+  moistcr1tikal 7,  
+  xqc 8  
 
 ### If you want to train your own model
 Recommended Twitch-chat downloader: 
@@ -51,20 +53,28 @@ Recommended Twitch-chat downloader:
 	* Section 18: Twitch reserves the right ...  to block or prevent your future access to and use of the Twitch Services for any reason, including without limitation if: (a) your use of the Twitch Services violates these Terms of Service ...
 
 ##### Needed:
-install.packages(c(  
-"keras3",  
-"reticulate",  
-"jsonlite",  
-"stringr",  
-"dplyr"  
-)) 
 
-install_keras(  
-backend = 'tensorflow',  
+Find out how to install keras on your device for R, depending on if you have GPU or only CPU. Ask an AI.
 
+```r
+install_keras( 
+backend = 'tensorflow',
+gpu = TRUE
 )
 
+install.packages(c( 
+"keras3",
+"reticulate", 
+"jsonlite", 
+"stringr", 
+"dplyr" 
+)) 
+```
+
+
 ##### Construct the following folder structure:
+* <streamer_name> folders must match the exact streamer names in settings.
+
 ./ 
 └──  Files in this repo.
 
@@ -73,7 +83,6 @@ backend = 'tensorflow',
     ├── <vod_1>.json
     └── <vod_2>.json
 
-* <streamer_name> folders must match the exact streamer names in settings.
 
 Each JSON must contain (where additional keys are allowed in both depths and are ignored):
 {
@@ -100,15 +109,16 @@ Have fun!
 * If you train the model with  `messages_per_chunk` = 10, then you need at least 10 messages to use "predict.R". 
 
 ### Improvements made
-* No identical stream can end up having chunks in both training and validation. (Reduced data leakage)
-###### FROM:
+No identical stream can end up having chunks in both training and validation. (Reduced data leakage)  
+FROM:
 * Created chunks
 * Shuffle chunks and split 80/20 
 
-####### TO IMPROVEMENT:
-Training streams -> Training chunks
-Validation streams -> Validation chunks
+TO:
+* Training streams -> Training chunks
+* Validation streams -> Validation chunks
 
 
-### Needed improvements
-* Word order within each individual message is lost through average pooling
+### Future improvements needed
+* Word order within each individual message is lost through the average pooling
+
