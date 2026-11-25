@@ -110,6 +110,7 @@ Have fun!
 
 ### Improvements made
 No identical stream can end up having chunks in both training and validation. (Reduced data leakage)  
+
 FROM:
 * Created chunks
 * Shuffle chunks and split 80/20 
