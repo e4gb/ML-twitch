@@ -1,4 +1,4 @@
-source(implement.R)
+source("implement.R")
 
 # predict.csv to predict
 
@@ -19,4 +19,4 @@ if (length(streamers) != model$output_shape[[2]]) {
   stop("Number of streamers does not match model output dimensions.")
 }
 
-predict_twitch("predict.csv")
+predict_twitch("predict.csv", column = 1, header = FALSE)

@@ -1,7 +1,34 @@
 # ML-twitch
-The data for a machine learning project for classification using keras in R for 9 twitch streamers based on the chatters.  
 
-Tokenization ID rules: "lookup.csv" not including 0, where 0 is saved for <unk> (unknown words).
+A machine learning project for classification for twitch streamers based on the chatters (Neural Network) using the package keras in R.
+
+
+![Training accuracy over epochs](example_figures/training_example.png)
+
+*Training and validation accuracy over 10 epochs for an example with 9 to 21 streams per streamer.*
+
+
+![Example of prediction](example_figures/example_prediction.png)
+
+*The example's prediction of the following messages: 
+Do you like machine learning?,
+Is coffee or tea better?, 
+qjocqcfjjfjccfydfg,
+Good stream,
+Love the content!,
+What is 1 + 2 - ahhhhh asdfasdfasdfasdfasdf,
+YES!,
+Lol,
+hahahahahha,
+what is this?,
+cinema,
+no*
+
+
+![Exanoke of tokenized message](example_figures/tokenized_messages_from_stream.png)
+
+*Tokenization ID rules for this example is in "lookup.csv" not including 0, where 0 is saved for <unk> (unknown words).*
+
 
 #### Streamers:
   cinna 0,
@@ -17,6 +44,7 @@ Tokenization ID rules: "lookup.csv" not including 0, where 0 is saved for <unk> 
 ### If you want to train your own model
 Recommended Twitch-chat downloader: 
 * "TwitchDownloader" (Copyright (©) lay295).
+* Limited use website but best for easy prediction test [twitchchatdownloader](https://www.twitchchatdownloader.com).
 * Consider [Twitch TOS](https://legal.twitch.com/en/legal/terms-of-service/) 
 	* Section 7: "(d) use of any data mining, robots, or similar data gathering or extraction methods; (e) downloading (except page caching) of any portion of the Twitch Services, the Materials, or any information contained in them, except as expressly permitted on the Twitch Services"
 	* Section 10: access any website, server, ... by Twitch, ..., by means of any robot, spider, scraper, crawler, or other automated means for any purpose

@@ -13,10 +13,13 @@ tf <- import("tensorflow")
 model <- load_model("twitch_streamer_model.keras")
 
 
-clean_csv_from_twitchchatdownloader.com <- function(csv) {
 
-  df <- read.csv(csv, header = TRUE)
-  df <- as.character(df[, 4])
+
+
+clean_csv_from_twitchchatdownloader.com <- function(csv, column = 1, header = TRUE) {
+
+  df <- read.csv(csv, header = header)
+  df <- as.character(df[[column]])
 
   temp_file <- tempfile(fileext = ".txt")
   valid_file <- tempfile(fileext = ".json")
@@ -80,7 +83,7 @@ predict_input_chunks <- function(
     messages_per_chunk,
     tf,
     output_file = "prediction_report.json",
-    verbose = TRUE,
+    verbose = TRUE
 ) {
 
   # ---------------------------------------------------------------------------
@@ -153,6 +156,8 @@ predict_input_chunks <- function(
   # ---------------------------------------------------------------------------
   predictions <- as.matrix(predict(model, prediction_input))
 
+  colnames(predictions) <- streamers
+  
   if (nrow(predictions) != n_chunks || ncol(predictions) != length(streamers)) {
     stop(
       "Prediction shape (", nrow(predictions), " x ", ncol(predictions),
@@ -180,9 +185,8 @@ predict_input_chunks <- function(
   # ---------------------------------------------------------------------------
   chunk_results <- lapply(seq_len(n_chunks), function(i) {
 
-    probabilities <- as.list(as.numeric(predictions[i, ]))
-    names(probabilities) <- streamers
-
+    probabilities <- setNames(as.numeric(predictions[i, ]), streamers)
+    
     list(
       chunk              = i,
       predicted_streamer = streamers[predicted_index[i]],
@@ -241,16 +245,18 @@ predict_input_chunks <- function(
 
   cat("\nSaved ", output_file, "\n", sep = "")
 
-  invisible(report)
+  return(invisible(list(report = report, probabilities = predictions)))
 }
 ##################### ChatGPT and Claude solution to some problems (END)
 
 
 
-predict_twitch <- function(predict_file = "predict.csv") {
+predict_twitch <- function(predict_file = "predict.csv", column = 1, header = TRUE) {
 
   valid_data <- clean_csv_from_twitchchatdownloader.com(
-    predict_file
+    predict_file,
+    column = column, 
+    header = header
   )
 
   predict_input_chunks(
