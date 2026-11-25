@@ -2,7 +2,8 @@
 
 A machine learning project for classification for twitch streamers based on the chatters (Neural Network) using the package keras3 in R.
 
-Only the following files need to be executed to train and predict, given that you follow ["If you want to train your own model"](#if-you-want-to-train-your-own-model).  
+Only the following files need to be executed to train and predict, given that you follow ["If you want to train your own model"](#if-you-want-to-train-your-own-model). 
+
 0. Set "settings.R" as you wish
 1. Run "vocabulary.R" 
 2. Run "train_model.R" 
